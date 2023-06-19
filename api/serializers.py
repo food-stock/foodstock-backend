@@ -26,6 +26,8 @@ class StockSerializer(serializers.ModelSerializer):
         fields = ['id', 'is_personal', 'owner', 'can_access', 'name', 'owned_stocks', 'accessible_stocks']
 
 class EntitiesSerializer(serializers.ModelSerializer):
+    food_name = serializers.CharField(source='food.name', read_only=True)
+    
     class Meta:
         model = Entities
-        fields = ['id', 'food', 'stock', 'quantity', 'date_of_consumption', 'category']
+        fields = ['id', 'food', 'food_name', 'stock', 'quantity', 'date_of_consumption', 'category']

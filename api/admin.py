@@ -15,8 +15,8 @@ class CategoriesAdmin(admin.ModelAdmin):
 
 @admin.register(Stock)
 class StockAdmin(admin.ModelAdmin):
-    list_display = ('id', 'is_personal', 'owner', 'can_access', 'name')
+    list_display = ('id', 'is_personal', 'owner', 'name')
 
 @admin.register(Entities)
 class EntitiesAdmin(admin.ModelAdmin):
-    list_display = ('id', 'food', 'stock', 'quantity', 'date_of_consumption', 'category')
+    list_display = ('id', 'food', 'stock', 'quantity', 'date_of_consumption')

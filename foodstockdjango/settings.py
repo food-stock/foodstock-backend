@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-m=wj@rpd#nz_+^(w5_k6+kk1y+_1ie@0sz#t_q$&74wz8@o2#f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'foodstockdjango.urls'
@@ -108,6 +110,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ]
 }
+
+## Cors origin
+CORS_ORIGIN_ALLOW_ALL = True  
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
