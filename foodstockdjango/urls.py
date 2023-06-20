@@ -33,4 +33,6 @@ urlpatterns = [
     path('search/<str:query>', search),
     path('search_stocks_with_access/<str:query>/<int:user_id>', search_stocks_with_access),
     path('create_entity/<stock_id>/<food_id>/<quantity>/<date_of_consumption>', create_entity),
+    path('update_entity_quantity/<int:entity_id>/<quantity>', update_entity_quantity),
+    path('create_user/<username>/<fname>/<lname>/<dob>/<email>/<password>', create_user),
 ]

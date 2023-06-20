@@ -43,7 +43,7 @@ def get_accessible_stocks_for_user(request, user_id):
     return JsonResponse({'stocks': list(stocks)})
 
 def get_entities_for_stock_and_category(request, stock_id, category_id):
-    entities = Entities.objects.filter(stock_id=stock_id, food__category_id=category_id).values('id', 'food__name','date_of_consumption','quantity')
+    entities = Entities.objects.filter(stock_id=stock_id, food__category_id=category_id).values('id', 'food_id','food__name','date_of_consumption','quantity')
     return JsonResponse({'entities': list(entities)})
 
 def get_entity_by_id(request, food_id, user_id):
@@ -55,7 +55,8 @@ def get_entity_by_id(request, food_id, user_id):
             'stock__name',
             'date_of_consumption',
             'quantity',
-            'date_of_purchase'
+            'date_of_purchase',
+            'stock__id'
         )
         food_info = Entities.objects.filter(food__id=food_id).values('food__name', 'food__picture', 'food__description','food__category__name').distinct()
         return JsonResponse({'entity': list(entity),"food_info":list(food_info)})
@@ -85,4 +86,22 @@ def create_entity(request,stock_id, food_id, quantity, date_of_consumption):
     query.save()
     return HttpResponse("Entity created successfully")
         
+from .hash import Fhash
     
+def update_entity_quantity(request, entity_id, quantity):
+    entity = Entities.objects.get(id=entity_id)
+    entity.quantity = quantity
+    entity.save()
+    return JsonResponse(data={"status":200,"message": "Entity updated successfully"}, status=200, safe=False)
+
+def create_user(request, username, fname, lname, dob, email, password):
+    query = User.objects.create(
+        username=username,
+        fname=fname,
+        lname=lname,
+        dob=dob,
+        email=email,
+        hashed_password=Fhash(password)
+    )
+    query.save()
+    return HttpResponse("User created successfully")
