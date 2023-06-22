@@ -58,7 +58,7 @@ def get_entity_by_id(request, food_id, user_id):
             'date_of_purchase',
             'stock__id'
         )
-        food_info = Entities.objects.filter(food__id=food_id).values('food__name', 'food__picture', 'food__description','food__category__name').distinct()
+        food_info = Entities.objects.filter(food__id=food_id).values('food__name', 'food__picture','food__category__name').distinct()
         return JsonResponse({'entity': list(entity),"food_info":list(food_info)})
     except Entities.DoesNotExist:
         return JsonResponse({'error': 'Entity does not exist'})
@@ -105,3 +105,52 @@ def create_user(request, username, fname, lname, dob, email, password):
     )
     query.save()
     return HttpResponse("User created successfully")
+
+def search_product_among_stocks(request, query, user_id):
+    entities = Entities.objects.filter(
+        Q(food__name__icontains=query) & (Q(stock__owner=user_id) | Q(stock__can_access=user_id))
+    ).values(
+        'food__name',
+        'food__id',
+        'food__picture',
+    ).distinct()
+    return JsonResponse({'entities': list(entities)})
+
+def rename_stock(request, stock_id, new_name):
+    stock = Stock.objects.get(id=stock_id)
+    stock.name = new_name
+    stock.save()
+    return JsonResponse(data={"status":200,"message": "Stock renamed successfully"}, status=200, safe=False)
+
+def set_stock_default(request, stock_id, is_default):
+    if is_default == "true":
+        is_default = True
+    if is_default == "false":
+        is_default = False
+    stock = Stock.objects.get(id=stock_id)
+    stock.is_default = is_default
+    stock.save()
+    return JsonResponse(data={"status":200,"message": "Stock set as default successfully"}, status=200, safe=False)
+
+def delete_stock(request, stock_id):
+    stock = Stock.objects.get(id=stock_id)
+    stock.delete()
+    return JsonResponse(data={"status":200,"message": "Stock deleted successfully"}, status=200, safe=False)
+
+def get_users_accessing_stock(request, stock_id):
+    users = Stock.objects.get(id=stock_id).can_access.values()
+    return JsonResponse({'users': list(users)})
+
+def remove_user_access_to_stock(request, stock_id, user_id):
+    stock = Stock.objects.get(id=stock_id)
+    stock.can_access.remove(user_id)
+    return JsonResponse(data={"status":200,"message": "User removed successfully"}, status=200, safe=False)
+
+def add_user_access_to_stock(request, stock_id, user_id):
+    stock = Stock.objects.get(id=stock_id)
+    stock.can_access.add(user_id)
+    return JsonResponse(data={"status":200,"message": "User added successfully"}, status=200, safe=False)
+
+def search_for_users(request, query, stock_id):
+    users = User.objects.filter(username__icontains=query).exclude(id__in=Stock.objects.get(id=stock_id).can_access.values_list('id', flat=True)).values()
+    return JsonResponse({'users': list(users)})

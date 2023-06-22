@@ -35,4 +35,12 @@ urlpatterns = [
     path('create_entity/<stock_id>/<food_id>/<quantity>/<date_of_consumption>', create_entity),
     path('update_entity_quantity/<int:entity_id>/<quantity>', update_entity_quantity),
     path('create_user/<username>/<fname>/<lname>/<dob>/<email>/<password>', create_user),
+    path('search_product_among_stocks/<str:query>/<int:user_id>', search_product_among_stocks),
+    path('rename_stock/<int:stock_id>/<str:new_name>', rename_stock),
+    path('set_stock_default/<int:stock_id>/<str:is_default>', set_stock_default),
+    path('delete_stock/<int:stock_id>', delete_stock),
+    path('get_users_accessing_stock/<int:stock_id>', get_users_accessing_stock),
+    path('remove_user_access_to_stock/<int:stock_id>/<int:user_id>', remove_user_access_to_stock),
+    path('add_user_access_to_stock/<int:stock_id>/<int:user_id>', add_user_access_to_stock),
+    path('search_for_users/<str:query>/<int:stock_id>', search_for_users),
 ]
