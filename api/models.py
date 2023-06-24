@@ -1,16 +1,5 @@
 from django.db import models
-
-
-class User(models.Model):
-    username = models.CharField(max_length=100)
-    fname = models.CharField(max_length=100)
-    lname = models.CharField(max_length=100)
-    dob = models.DateField()
-    email = models.EmailField()
-    hashed_password = models.CharField(max_length=100, null=True)
-    
-    def __str__(self):
-        return self.username
+from django.contrib.auth.models import User
 
 class Food(models.Model):
     name = models.CharField(max_length=100)
