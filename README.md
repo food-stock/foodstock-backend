@@ -12,7 +12,7 @@ The frontend and backend are separated in two different repositories. The backen
  I wanted them to be separated because I wanted to be able to change the frontend without changing the backend and vice versa.
 
 
-## Features
+## Roadmap
 - [x] Basic functions
 - [x] Authentication
 - [x] Secure the API : Endpoints compare the user id of the provided token with the user id of the object to ensure that no one can access other users data
