@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.db.models import Count, Q
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -32,9 +33,6 @@ class EntitiesViewSet(viewsets.ModelViewSet):
 
 
 ## CUSTOM ENDPOINTS
-from django.http import JsonResponse, HttpResponse
-from django.db.models import Q
-from .hash import Fhash
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -48,14 +46,15 @@ def get_categories_for_stock(request, stock_id):
 def get_accessible_stocks_for_user(request, user_id):
     if user_id != request.user.id:
         return Response({'error': 'Invalid user id'})
-        
-    stocks = Stock.objects.filter(Q(owner=user_id) | Q(can_access=user_id)).values()
+
+    stocks = Stock.objects.filter(Q(owner=user_id) | Q(can_access=user_id)).annotate(entity_count=Count('entities')).order_by('-is_default', '-entity_count').values()
+
     return Response({'stocks': list(stocks)})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_entities_for_stock_and_category(request, stock_id, category_id):
-    entities = Entities.objects.filter(stock_id=stock_id, food__category_id=category_id).values('id', 'food_id','food__name','date_of_consumption','quantity')
+    entities = Entities.objects.filter(Q(quantity__gt=0),stock_id=stock_id, food__category_id=category_id).values('id', 'food_id','food__name','date_of_consumption','quantity')
     return Response({'entities': list(entities)})
 
 @api_view(['GET'])
@@ -64,7 +63,7 @@ def get_entity_by_id(request, food_id, user_id):
     user_id = request.user.id
     try:
         entity = Entities.objects.filter(
-            Q(food__id=food_id) & (Q(stock__owner=user_id) | Q(stock__can_access=user_id))
+            Q(food__id=food_id) & (Q(stock__owner=user_id) | Q(stock__can_access=user_id) & Q(quantity__gt=0) )
         ).values(
             'id',
             'stock__name',
@@ -85,7 +84,9 @@ def search(request, query):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def search_stocks_with_access(request, query):
+def search_stocks_with_access(request, query,user_id):
+    if user_id != request.user.id:
+        return Response({'error': 'Invalid user id'})
     user_id = request.user.id
     stocks = Stock.objects.filter(
         Q(name__icontains=query) & (Q(owner=user_id) | Q(can_access=user_id))
@@ -128,7 +129,7 @@ def update_entity_quantity(request, entity_id, quantity):
 def search_product_among_stocks(request, query):
     user_id = request.user.id
     entities = Entities.objects.filter(
-        Q(food__name__icontains=query) & (Q(stock__owner=user_id) | Q(stock__can_access=user_id))
+        Q(food__name__icontains=query) & (Q(stock__owner=user_id) | Q(stock__can_access=user_id) & Q(quantity__gt=0))
     ).values(
         'food__name',
         'food__id',
@@ -253,3 +254,9 @@ def register_user(request):
     stock.save()
     user = User.objects.get(username=request.data.get('username'))
     return Response({'user_id': user.id}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_product_from_barcode(request, barcode):
+    food = Food.objects.filter(barcode=barcode).values()
+    return Response({'food': list(food)}, status=status.HTTP_200_OK)

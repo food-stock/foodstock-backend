@@ -5,6 +5,7 @@ class Food(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey('Categories', on_delete=models.CASCADE, related_name='foods',default=1)
     picture = models.CharField(max_length=200, blank=True)
+    barcode = models.CharField(max_length=100, blank=True)
     
     def __str__(self):
         return self.name

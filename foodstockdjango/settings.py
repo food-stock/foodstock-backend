@@ -12,23 +12,13 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-m=wj@rpd#nz_+^(w5_k6+kk1y+_1ie@0sz#t_q$&74wz8@o2#f'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -74,20 +64,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodstockdjango.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -105,8 +87,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
@@ -117,16 +97,12 @@ REST_FRAMEWORK = {
         ], 
 }
 
-## Cors 
-
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
-
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ORIGIN_WHITELIST = (
     'https://localhost:5173',
     'https://127.0.0.1:8000',
@@ -154,11 +130,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
 STATIC_URL = '/static/'
+
 STATIC_ROOT = os.path.join(BASE_DIR,'/static')
 
 STATICFILES_DIRS = [
@@ -166,14 +139,11 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'staticfiles/images')
-MEDIA_URL = os.path.join(BASE_DIR, 'static/images/')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
+MEDIA_URL = os.path.join(BASE_DIR, 'static/images/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#DJANGO REST SIMPLE JWT
 from datetime import timedelta
 
 SIMPLE_JWT = {

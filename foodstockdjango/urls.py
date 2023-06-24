@@ -30,5 +30,6 @@ urlpatterns = [
     path('search_for_users/<str:query>/<int:stock_id>/', search_for_users),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('register/', register_user)
+    path('register/', register_user),
+    path('get_product_from_barcode/<str:barcode>/', get_product_from_barcode),
 ]
