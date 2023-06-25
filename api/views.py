@@ -1,12 +1,15 @@
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from .models import Food, Categories, Stock, Entities
+from .models import Food, Categories, Stock, Entities, PushSubscription, Push
 from .serializers import UserSerializer, FoodSerializer, CategoriesSerializer, StockSerializer, EntitiesSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.db.models import Count, Q
+from django.shortcuts import render
+from foodstockdjango.settings import WEBPUSH_SETTINGS
+from django.http import HttpResponse
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -260,3 +263,65 @@ def register_user(request):
 def get_product_from_barcode(request, barcode):
     food = Food.objects.filter(barcode=barcode).values()
     return Response({'food': list(food)}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_latest_webpush(request, user_id):
+    user = User.objects.get(id=user_id)
+    if user_id != request.user.id:
+        return Response({'error': 'Invalid user id'})
+    latest_webpush = Push.objects.filter(user=user).order_by('-date').values('title', 'body', 'date')[:10]
+    return Response({'push': latest_webpush}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_subscription(request):
+    user = User.objects.get(id=request.user.id)
+    subscription = PushSubscription.objects.create(
+        user=user,
+        endpoint=request.GET.get('endpoint'),
+        p256dh=request.GET.get('p256dh'),
+        auth=request.GET.get('auth')
+    )
+    subscription.save()
+    return Response({'subscription': subscription.id}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def remove_subscription(request):
+    user = User.objects.get(id=request.user.id)
+    subscription = PushSubscription.objects.get(user=user)
+    subscription.delete()
+    return Response({'subscription': subscription.id}, status=status.HTTP_200_OK)
+
+from pywebpush import webpush, WebPushException
+
+def test_notif(request):
+    suscription = PushSubscription.objects.get(id=6)
+    try:
+        webpush(
+            subscription_info={
+                "endpoint": suscription.endpoint,
+                "keys": {
+                    "p256dh": suscription.p256dh,
+                    "auth": suscription.auth
+                }},
+            data="Mary had a little lamb, with a nice mint jelly",
+            vapid_private_key=WEBPUSH_SETTINGS['VAPID_PRIVATE_KEY'],
+            vapid_claims={
+                    "sub": "mailto:" + WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL'],
+                }
+        )
+        return HttpResponse("OK")
+    except WebPushException as ex:
+        print("I'm sorry, Dave, but I can't do that: {}", repr(ex))
+        # Mozilla returns additional information in the body of the response.
+        if ex.response and ex.response.json():
+            extra = ex.response.json()
+            print("Remote service replied with a {}:{}, {}",
+                extra.code,
+                extra.errno,
+                extra.message
+                )
+        return HttpResponse("KO")   

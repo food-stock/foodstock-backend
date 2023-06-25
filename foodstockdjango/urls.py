@@ -32,4 +32,8 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', register_user),
     path('get_product_from_barcode/<str:barcode>/', get_product_from_barcode),
+    path('get_latest_webpush/<int:user_id>/', get_latest_webpush),
+    path('register_subscription/', register_subscription),
+    path('remove_subscription/', remove_subscription),
+    path('test_notif/', test_notif),
 ]

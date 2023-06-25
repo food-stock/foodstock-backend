@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
-
+from django.contrib.auth.models import User, Group
+    
 class Food(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey('Categories', on_delete=models.CASCADE, related_name='foods',default=1)
@@ -23,7 +23,7 @@ class Stock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_stocks')
     can_access = models.ManyToManyField(User, related_name='accessible_stocks', blank=True)
     name = models.CharField(max_length=100)
-    is_default = models.BooleanField(null=True,blank=True,default=False)
+    is_default = models.BooleanField(null=True, blank=True, default=False)
     
     def __str__(self):
         return self.name
@@ -38,3 +38,21 @@ class Entities(models.Model):
 
     def __str__(self):
         return self.food.name
+
+class PushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions') 
+    endpoint = models.CharField(max_length=500,blank=True,null=True)
+    p256dh = models.CharField(max_length=500,blank=True,null=True)
+    auth = models.CharField(max_length=500,blank=True,null=True)
+
+class Push(models.Model):
+    is_user_only = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pushesuser',blank=True, null=True)
+    is_group = models.BooleanField(default=False)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='pushesgroup',blank=True, null=True)
+    date = models.DateField(auto_now_add=True, null=True)
+    title = models.CharField(max_length=100)
+    body = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return self.user.username
