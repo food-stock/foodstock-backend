@@ -10,6 +10,7 @@ from django.db.models import Count, Q
 from django.shortcuts import render
 from foodstockdjango.settings import WEBPUSH_SETTINGS
 from django.http import HttpResponse
+from .parser import *
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -294,6 +295,11 @@ def remove_subscription(request):
     subscription = PushSubscription.objects.get(user=user)
     subscription.delete()
     return Response({'subscription': subscription.id}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_id(request):
+    return Response({'id': request.user.id}, status=status.HTTP_200_OK)
 
 from pywebpush import webpush, WebPushException
 

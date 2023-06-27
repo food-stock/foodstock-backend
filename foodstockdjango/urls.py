@@ -35,5 +35,6 @@ urlpatterns = [
     path('get_latest_webpush/<int:user_id>/', get_latest_webpush),
     path('register_subscription/', register_subscription),
     path('remove_subscription/', remove_subscription),
+    path('get_user_id/', get_user_id),
     path('test_notif/', test_notif),
 ]
