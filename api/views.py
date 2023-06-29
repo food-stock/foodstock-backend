@@ -120,6 +120,7 @@ def create_entity(request, stock_id, food_id, quantity, date_of_consumption):
 def update_entity_quantity(request, entity_id, quantity):
     user_id = request.user.id
     entity = Entities.objects.get(id=entity_id)
+    quantity = float(quantity)
 
     if entity.stock.owner.id != user_id and user_id not in entity.stock.can_access.values_list('id', flat=True):
         return Response({'error': 'Unauthorized'})
@@ -254,6 +255,8 @@ def register_user(request):
     stock = Stock.objects.create(
         name="Maison",
         owner = user,
+        is_default = True,
+        is_personal = True,
     )
     stock.save()
     user = User.objects.get(username=request.data.get('username'))

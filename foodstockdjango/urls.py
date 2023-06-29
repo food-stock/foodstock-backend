@@ -18,7 +18,7 @@ urlpatterns = [
     path('search/<str:query>/', search),
     path('search_stocks_with_access/<str:query>/<int:user_id>/', search_stocks_with_access),
     path('create_entity/<int:stock_id>/<int:food_id>/<int:quantity>/<str:date_of_consumption>/', create_entity),
-    path('update_entity_quantity/<int:entity_id>/<int:quantity>/', update_entity_quantity),
+    path('update_entity_quantity/<int:entity_id>/<str:quantity>/', update_entity_quantity),
     path('search_product_among_stocks/<str:query>/<int:user_id>/', search_product_among_stocks),
     path('rename_stock/<int:stock_id>/<str:new_name>/', rename_stock),
     path('set_stock_default/<int:stock_id>/<str:is_default>/', set_stock_default),
