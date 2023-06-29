@@ -10,7 +10,7 @@ from django.db.models import Count, Q
 from django.shortcuts import render
 from foodstockdjango.settings import WEBPUSH_SETTINGS
 from django.http import HttpResponse
-from .parser import *
+from .parse import *
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

@@ -1,2 +1,2 @@
-GET http://127.0.0.1:8000/get_categories_for_stock/1/
+GET http://127.0.0.1:8000/token/
 Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjg3NjkzODQwLCJpYXQiOjE2ODc2MDc0NDAsImp0aSI6IjliZDNkN2FjYjFiZDQyOTVhNDg2ODM4ZGZiMzc4MDQxIiwidXNlcl9pZCI6MX0.csjlRT2-LHJbTdlk7Xdq7UjBqIKYaDwTw8B3XfKLP6k
