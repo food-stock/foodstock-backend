@@ -265,8 +265,18 @@ def register_user(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_product_from_barcode(request, barcode):
-    food = Food.objects.filter(barcode=barcode).values()
-    return Response({'food': list(food)}, status=status.HTTP_200_OK)
+    if Food.objects.filter(barcode=barcode).exists():
+        food = Food.objects.get(barcode=barcode)
+        return Response({'food': food.id}, status=status.HTTP_200_OK)
+    else:
+        url_img, title = find_image_by_barcode(barcode)
+        food = Food.objects.create(
+            barcode=barcode,
+            title=title,
+            url_img=url_img,
+        )
+        food.save()
+        return Response({'food': food.id}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -295,9 +305,10 @@ def register_subscription(request):
 @permission_classes([IsAuthenticated])
 def remove_subscription(request):
     user = User.objects.get(id=request.user.id)
-    subscription = PushSubscription.objects.get(user=user)
-    subscription.delete()
-    return Response({'subscription': subscription.id}, status=status.HTTP_200_OK)
+    subscription = PushSubscription.objects.all().filter(user=user)
+    for sub in subscription:
+        sub.delete()
+    return Response({'message':'ok'}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -306,31 +317,33 @@ def get_user_id(request):
 
 from pywebpush import webpush, WebPushException
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def test_notif(request):
-    suscription = PushSubscription.objects.get(id=6)
-    try:
-        webpush(
-            subscription_info={
-                "endpoint": suscription.endpoint,
-                "keys": {
-                    "p256dh": suscription.p256dh,
-                    "auth": suscription.auth
-                }},
-            data="Mary had a little lamb, with a nice mint jelly",
-            vapid_private_key=WEBPUSH_SETTINGS['VAPID_PRIVATE_KEY'],
-            vapid_claims={
-                    "sub": "mailto:" + WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL'],
-                }
-        )
-        return HttpResponse("OK")
-    except WebPushException as ex:
-        print("I'm sorry, Dave, but I can't do that: {}", repr(ex))
-        # Mozilla returns additional information in the body of the response.
-        if ex.response and ex.response.json():
-            extra = ex.response.json()
-            print("Remote service replied with a {}:{}, {}",
-                extra.code,
-                extra.errno,
-                extra.message
-                )
-        return HttpResponse("KO")   
+    suscriptions = PushSubscription.objects.all().filter(user__id=request.user.id)
+    for suscription in suscriptions:
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": suscription.endpoint,
+                    "keys": {
+                        "p256dh": suscription.p256dh,
+                        "auth": suscription.auth
+                    }},
+                data="Mary had a little lamb, with a nice mint jelly",
+                vapid_private_key=WEBPUSH_SETTINGS['VAPID_PRIVATE_KEY'],
+                vapid_claims={
+                        "sub": "mailto:" + WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL'],
+                    }
+            )
+        except WebPushException as ex:
+            print("I'm sorry, Dave, but I can't do that: {}", repr(ex))
+            # Mozilla returns additional information in the body of the response.
+            if ex.response and ex.response.json():
+                extra = ex.response.json()
+                print("Remote service replied with a {}:{}, {}",
+                    extra.code,
+                    extra.errno,
+                    extra.message
+                    )
+    return Response({'message': 'ok'}, status=status.HTTP_200_OK)
