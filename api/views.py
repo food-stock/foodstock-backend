@@ -11,6 +11,7 @@ from django.shortcuts import render
 from foodstockdjango.settings import WEBPUSH_SETTINGS
 from django.http import HttpResponse
 from .parse import *
+import json
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -285,7 +286,7 @@ def get_latest_webpush(request, user_id):
     user = User.objects.get(id=user_id)
     if user_id != request.user.id:
         return Response({'error': 'Invalid user id'})
-    latest_webpush = Push.objects.filter(user=user).order_by('-date').values('title', 'body', 'date')[:10]
+    latest_webpush = Push.objects.filter(is_user_only=True,user=user).order_by('-date').values('title', 'body', 'date')[:5]
     return Response({'push': latest_webpush}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -304,10 +305,10 @@ def register_subscription(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def remove_subscription(request):
-    user = User.objects.get(id=request.user.id)
-    subscription = PushSubscription.objects.all().filter(user=user)
-    for sub in subscription:
-        sub.delete()
+    endpoint = request.GET.get('endpoint')
+    print(endpoint)
+    subscription = PushSubscription.objects.get(endpoint=endpoint)
+    subscription.delete()
     return Response({'message':'ok'}, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
@@ -330,12 +331,19 @@ def test_notif(request):
                         "p256dh": suscription.p256dh,
                         "auth": suscription.auth
                     }},
-                data="Mary had a little lamb, with a nice mint jelly",
+                data= json.dumps({'head': 'TestH', 'body': 'TestBody','click_data':"/login"}),
                 vapid_private_key=WEBPUSH_SETTINGS['VAPID_PRIVATE_KEY'],
                 vapid_claims={
                         "sub": "mailto:" + WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL'],
                     }
             )
+            query = Push.objects.create(
+                title="Test",
+                body="Test",
+                is_user_only=True,
+                user=request.user,
+            )
+            query.save()
         except WebPushException as ex:
             print("I'm sorry, Dave, but I can't do that: {}", repr(ex))
             # Mozilla returns additional information in the body of the response.
@@ -347,3 +355,33 @@ def test_notif(request):
                     extra.message
                     )
     return Response({'message': 'ok'}, status=status.HTTP_200_OK)
+
+def send_push_user(user_id,head,body,click_data):
+    subs = PushSubscription.objects.all().filter(user__id=user_id)
+    for sub in subs:
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": sub.endpoint,
+                    "keys": {
+                        "p256dh": sub.p256dh,
+                        "auth": sub.auth
+                    }},
+                data= json.dumps({'head': head, 'body': body,'click_data': click_data}),
+                vapid_private_key=WEBPUSH_SETTINGS['VAPID_PRIVATE_KEY'],
+                vapid_claims={
+                        "sub": "mailto:" + WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL'],
+                    }
+            )
+            query = Push.objects.create(
+                title=head,
+                body=body,
+                is_user_only=True,
+                user=User.objects.get(id=user_id),
+            )
+            query.save()
+        except WebPushException as ex:
+            print("I'm sorry, Dave, but I can't do that: {}", repr(ex))
+            if ex.response and ex.response.json():
+                extra = ex.response.json()
+                print("Remote service replied with a {}:{}, {}",extra.code,extra.errno,extra.message)
