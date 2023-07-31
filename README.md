@@ -16,7 +16,6 @@ The frontend and backend are separated in two different repositories. The front-
 - [x] Basic functions
 - [x] Authentication
 - [x] Secure the API : Endpoints compare the user id of the provided token with the user id of the object to ensure that no one can access other users data
-- [x] Refresh token function
 - [ ] Generate Swagger documentation
-- [ ] Host the landing page here
+- [ ] Host the landing page here and
 - [ ] Make a paid plan
