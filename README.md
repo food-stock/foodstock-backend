@@ -7,7 +7,7 @@ The backend is build using [Django](https://www.djangoproject.com/). Django is u
 
 I chose to use Django because I have a lot of experience with it and it is very easy to use. 
 
-The frontend and backend are separated in two different repositories. The front-end is available [here](https://github.com/food-stock/foodstock-backend).
+The frontend and backend are separated in two different repositories. The front-end is available [here](https://github.com/food-stock/foodstock-frontend).
 
  I wanted them to be separated because I wanted to be able to change the frontend without changing the backend and vice versa.
 
