@@ -101,6 +101,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_WHITELIST = (
     'https://localhost:5173',
     'https://127.0.0.1:8000',
+    'https://localhost:4173/',
+    '*'
 )
 
 CORS_ALLOW_HEADERS = [

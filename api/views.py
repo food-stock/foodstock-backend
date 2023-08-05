@@ -132,15 +132,16 @@ def update_entity_quantity(request, entity_id, quantity):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def search_product_among_stocks(request, query):
-    user_id = request.user.id
+def search_product_among_stocks(request, query, user_id):
+    if user_id != request.user.id:
+        return Response({'error': 'Invalid user id'})
     entities = Entities.objects.filter(
         Q(food__name__icontains=query) & (Q(stock__owner=user_id) | Q(stock__can_access=user_id) & Q(quantity__gt=0))
     ).values(
         'food__name',
         'food__id',
         'food__picture',
-    ).distinct()
+    ).distinct()[:5]
     return Response({'entities': list(entities)}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -186,7 +187,11 @@ def set_stock_personal(request,stock_id, is_personal):
     if stock.owner.id != user_id:
         return Response({'error': 'Unauthorized'})
 
-    stock.is_personal = is_personal == "true"
+    if is_personal == "true":
+        stock.is_personal = True
+        stock.can_access.clear()
+    else:
+        stock.is_personal = False
     stock.save()
     return Response("Stock set as personal successfully", status=status.HTTP_200_OK)
 
@@ -212,6 +217,7 @@ def get_users_accessing_stock(request, stock_id):
         return Response({'error': 'Unauthorized'})
 
     users = stock.can_access.values()
+    users = [user for user in users if user['id'] != stock.owner.id]
     return Response({'users': list(users)}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -241,7 +247,7 @@ def add_user_access_to_stock(request, stock_id, user_id):
 @api_view(['GET'])
 def search_for_users(request, query, stock_id):
     users = User.objects.filter(username__icontains=query).exclude(id__in=Stock.objects.get(id=stock_id).can_access.values_list('id', flat=True)).values()
-    return JsonResponse({'users': list(users)})
+    return Response({'users': list(users)})
 
 @api_view(['POST'])
 def register_user(request):
