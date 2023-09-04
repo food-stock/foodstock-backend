@@ -38,6 +38,15 @@ class EntitiesViewSet(viewsets.ModelViewSet):
 
 
 ## CUSTOM ENDPOINTS
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+    user_id = request.user.id
+    print("ZAAAAAAAAAAAAAAAAAAAAAAAA")
+    if user_id == request.GET.get('user_id'):
+        return Response({'message': 'ok'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -391,3 +400,18 @@ def send_push_user(user_id,head,body,click_data):
             if ex.response and ex.response.json():
                 extra = ex.response.json()
                 print("Remote service replied with a {}:{}, {}",extra.code,extra.errno,extra.message)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def create_stock(request,user_id):
+    user_id = request.user.id
+    if user_id != request.user.id:
+        return Response({'error': 'Invalid user id'})
+    stock = Stock.objects.create(
+        name=request.GET.get('name'),
+        owner=User.objects.get(id=user_id),
+        is_default=False,
+        is_personal=False,
+    )
+    stock.save()
+    return Response({'stock': stock.id}, status=status.HTTP_200_OK)

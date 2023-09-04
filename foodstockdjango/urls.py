@@ -11,6 +11,7 @@ router.registry.extend(api_router.registry)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path('test_token/', test_token),
     path('get_categories_for_stock/<int:stock_id>/', get_categories_for_stock),
     path('stocks/user/<int:user_id>/', get_accessible_stocks_for_user),
     path('get_entities_for_stock_and_category/<int:stock_id>/<int:category_id>/', get_entities_for_stock_and_category),
@@ -37,4 +38,5 @@ urlpatterns = [
     path('remove_subscription/', remove_subscription),
     path('get_user_id/', get_user_id),
     path('test_notif/', test_notif),
+    path('create_stock/<int:user_id>/', create_stock),
 ]
