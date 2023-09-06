@@ -42,10 +42,11 @@ class EntitiesViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 def test_token(request):
     user_id = request.user.id
-    print("ZAAAAAAAAAAAAAAAAAAAAAAAA")
     if user_id == request.GET.get('user_id'):
         return Response({'message': 'ok'}, status=status.HTTP_200_OK)
     else:
+        print(user_id)
+        print(request.GET.get('user_id'))
         return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET'])
