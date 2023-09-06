@@ -4,3 +4,4 @@ django-cors-headers
 djangorestframework-simplejwt
 pywebpush
 python-dotenv
+django-admin-honeypot

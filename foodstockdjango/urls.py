@@ -3,13 +3,15 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from api.urls import router as api_router
+import admin_honeypot.urls
 from api.views import *
 
 router = routers.DefaultRouter()
 router.registry.extend(api_router.registry)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('secret/', admin.site.urls),
+    path('admin/', include(admin_honeypot.urls)),
     path('', include(router.urls)),
     path('test_token/', test_token),
     path('get_categories_for_stock/<int:stock_id>/', get_categories_for_stock),
