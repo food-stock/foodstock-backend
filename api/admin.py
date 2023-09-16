@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Food, Categories, Stock, Entities, PushSubscription, Push
+from .models import *
 
 @admin.register(Food)
 class FoodAdmin(admin.ModelAdmin):
@@ -24,3 +24,7 @@ class PushSubscriptionAdmin(admin.ModelAdmin):
 @admin.register(Push)
 class PushAdmin(admin.ModelAdmin):
     list_display = ('id', 'is_user_only', 'user', 'is_group', 'group', 'date', 'title', 'body')
+
+@admin.register(JoinProposals)
+class JoinProposalsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user')

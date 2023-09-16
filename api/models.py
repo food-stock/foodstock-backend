@@ -56,3 +56,13 @@ class Push(models.Model):
     
     def __str__(self):
         return self.user.username
+    
+class JoinProposals(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True, null=True)
+    is_accepted = models.BooleanField(default=False)
+    date_accepted = models.DateField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.user.username + " wants to join " + self.stock.name

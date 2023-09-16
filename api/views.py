@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from django.contrib.auth.models import User
-from .models import Food, Categories, Stock, Entities, PushSubscription, Push
+from .models import *
 from .serializers import UserSerializer, FoodSerializer, CategoriesSerializer, StockSerializer, EntitiesSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -251,8 +251,22 @@ def add_user_access_to_stock(request, stock_id, user_id):
     if stock.owner.id != owner_id:
         return Response({'error': 'Unauthorized'})
 
-    stock.can_access.add(user_id)
+    JoinProposals.objects.create(
+        user = User.objects.get(id=user_id),
+        stock = stock,
+    )
+    send_push_user(user_id,"Access Proposal",request.user.username+" wants to give you access to his stock","/pasencorefait")
     return Response("User added successfully", status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def accept_user_access_to_stock(request, stock_id, user_id):
+    stock = Stock.objects.get(id=stock_id)
+    if JoinProposals.objects.filter(user__id=user_id, stock__id=stock_id).exists():
+        JoinProposals.objects.filter(user__id=user_id, stock__id=stock_id).update(is_accepted=True,date_accepted=datetime.now())
+        stock.can_access.add(user_id)
+        return Response("User added successfully", status=status.HTTP_200_OK)
+    return Response("User not added", status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 def search_for_users(request, query, stock_id):
