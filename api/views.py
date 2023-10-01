@@ -300,6 +300,8 @@ def get_product_from_barcode(request, barcode):
         food = Food.objects.get(barcode=barcode)
         return Response({'food': food.id}, status=status.HTTP_200_OK)
     else:
+        if barcode == None or barcode == "":
+            return Response({'error': 'No barcode provided'})
         url_img, title = find_image_by_barcode(barcode)
         food = Food.objects.create(
             barcode=barcode,
