@@ -38,7 +38,7 @@ class EntitiesViewSet(viewsets.ModelViewSet):
 
 
 ## CUSTOM ENDPOINTS
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def test_token(request):
     user_id = request.user.id
