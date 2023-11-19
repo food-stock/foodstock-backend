@@ -7,8 +7,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-m=wj@rpd#nz_+^(w5_k6+kk1y+_1ie@0sz#t_q$&74wz8@o2#f'
 
-DEBUG = True
-
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -55,13 +53,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'foodstockdjango.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
@@ -153,6 +144,18 @@ WEBPUSH_SETTINGS = {
     "VAPID_ADMIN_EMAIL": os.getenv("VAPID_ADMIN_EMAIL"),
 }
 
+
+
+DEBUG = True
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
 if DEBUG==False:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = ''
@@ -160,8 +163,19 @@ if DEBUG==False:
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
-    
     ADMIN_HONEYPOT_EMAIL_ADMINS=True
+
+else :
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv("DB_NAME"),
+            'USER': os.getenv("DB_USER"),
+            'PASSWORD': os.getenv("DB_PASSWORD"),
+            'HOST': os.getenv("DB_HOST"),
+            'PORT': os.getenv("DB_PORT"),
+        }
+    }
 
 
 
